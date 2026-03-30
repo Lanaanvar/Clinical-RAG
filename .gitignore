@@ -1,0 +1,17 @@
+# Virtual environment
+.venv/
+
+# Environment variables — never commit secrets
+.env
+
+# Data files — too large for GitHub
+app/data/
+qdrant_storage/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# OS
+.DS_Store
+Thumbs.db

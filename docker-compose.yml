@@ -1,0 +1,67 @@
+# version: "3.9"
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: clinical_qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clinical_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+      - DOCUMENT_STORE_PATH=/app/data/document_store.json
+    volumes:
+      - ./app/data:/app/data
+    depends_on:
+      qdrant:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clinical_ingest
+    env_file:
+      - .env
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+      - DOCUMENT_STORE_PATH=/app/data/document_store.json
+      - MAX_ROWS=${MAX_ROWS:-0}
+      - RECREATE_COLLECTION=${RECREATE_COLLECTION:-false}
+    volumes:
+      - ./app/data:/app/data
+    depends_on:
+      qdrant:
+        condition: service_started
+    command: ["python", "-m", "ingestion.ingest"]
+    restart: "no"
+
+volumes:
+  qdrant_data:
+    driver: local
