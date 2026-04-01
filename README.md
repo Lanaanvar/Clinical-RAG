@@ -137,4 +137,4 @@ See `.env.example` for all variables.
 
 ## Dataset
 
-**Vinay393/augmented-clinical-notes** — 30,000 clinical case rows with fields: `idx`, `note`, `full_note`, `conversation`, `summary`. License: MIT.
+**AGBonnet/augmented-clinical-notes** — 30,000 clinical case rows with fields: `idx`, `note`, `full_note`, `conversation`, `summary`. License: MIT.
